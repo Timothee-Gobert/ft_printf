@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_printf.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tgobert <tgobert@student.42.fr>            +#+  +:+       +#+        */
+/*   By: inox <inox@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/10 07:28:56 by tgobert           #+#    #+#             */
-/*   Updated: 2025/11/10 12:21:52 by tgobert          ###   ########.fr       */
+/*   Updated: 2025/11/10 22:51:23 by inox             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,38 +17,111 @@
 #include <unistd.h>
 
 // reprise de libft
-void	ft_putchar_fd(char c, int fd)
+int	ft_putchar_fd(char c, int fd, int len)
 {
 	write(fd, &c, 1);
+	len++;
+	return (len);
 }
 
-void	ft_putstr_fd(char *s, int fd)
+int	ft_putstr_fd(char *s, int fd, int len)
 {
-	if (!s)
+	int i;
+
+	i = 0;
+	while (s[i])
 	{
-		return ((void) NULL);
+		len = ft_putchar_fd(s[i], fd, len);
+		i++;
 	}
-	while (*s)
-		write(fd, s++, 1);
+	return (len);
 }
 
-void	ft_putnbr_fd(int n, int fd)
+int ft_printf_s(char *str, int fd, int len)
 {
-	long	ln;
+    len = ft_putstr_fd(str, fd, len);
+    return (len);
+}
 
-	ln = n;
-	if (ln < 0)
+int ft_printf_c(int c, int fd, int len)
+{
+    len = ft_putchar_fd(c, fd , len);
+    return (len);
+}
+
+int	ft_putnbr_base_fd(long long int nbr, char *base, int fd, int len)
+{
+	long long int	i;
+	
+	i = 0;
+	while (base[i] != 0)
+		i++;
+	if (nbr < 0)
 	{
-		ft_putchar_fd('-', fd);
-		ln *= -1;
+		len = ft_putchar_fd('-', 1, len);
+		len = ft_putnbr_base_fd(-nbr, base, fd, len);
 	}
-	if (ln <= 9)
-		ft_putchar_fd(ln + '0', fd);
+	else if (nbr > i - 1)
+	{
+		len = ft_putnbr_base_fd(nbr / i, base, fd, len);
+		len = ft_putnbr_base_fd(nbr % i, base, fd, len);
+	}
 	else
 	{
-		ft_putnbr_fd(ln / 10, fd);
-		ft_putnbr_fd(ln % 10, fd);
+		len = ft_putchar_fd(base[0 + nbr], fd, len);
 	}
+	return (len);
+}
+
+int	ft_putnbr_base_unsigned_fd(unsigned int nbr, char *base, int fd, int len)
+{
+	unsigned int	i;
+	
+	i = 0;
+	while (base[i] != 0)
+		i++;
+	if (nbr > i - 1)
+	{
+		len = ft_putnbr_base_fd(nbr / i, base, fd, len);
+		len = ft_putnbr_base_fd(nbr % i, base, fd, len);
+	}
+	else
+	{
+		len = ft_putchar_fd(base[0 + nbr], fd, len);
+	}
+	return (len);
+}
+
+int ft_printf_p(long long int n, int fd, int len)
+{
+    len = ft_putchar_fd('0', fd, len);
+	len = ft_putchar_fd('x', fd, len);
+	len = ft_putnbr_base_fd(n, "0123456789abcdef", 1, len);
+	return (len);
+}
+
+int ft_printf_x(long long int n, int fd, int len)
+{
+	len = ft_putnbr_base_fd(n, "0123456789abcdef", 1, len);
+	return (len);
+}
+
+int ft_printf_X(long long int n, int fd, int len)
+{
+	len = ft_putnbr_base_fd(n, "0123456789ABCDEF", 1, len);
+	return (len);
+}
+
+int ft_printf_u(long long int n, int fd, int len)
+{
+	len = ft_putnbr_base_unsigned_fd(n, "0123456789", 1, len);
+	return (len);
+}
+
+int ft_printf_d_i(long long int n, int fd, int len)
+{
+	len = ft_putnbr_base_fd(n, "0123456789", 1, len);
+	return (len);
 }
 
 int	ft_printf(const char *str, ...)
@@ -65,36 +138,48 @@ int	ft_printf(const char *str, ...)
 		if (str[i] == '%')
 		{
 			if ((str[i + 1] == '%'))
-				write(STDOUT_FILENO, "%", 1);
+				len = ft_putchar_fd('%', 1, len);
 			else if ((str[i + 1] == 'c'))
-				ft_putchar_fd(va_arg(args, int), 1);
+				len = ft_printf_c(va_arg(args, int), 1, len);
 			else if ((str[i + 1] == 's'))
-				ft_putstr_fd(va_arg(args, char *), 1);
-			// else if ((str[i + 1] == 'p'))
-			else if ((str[i + 1] == 'd'))
-				ft_putnbr_fd(va_arg(args, int), 1);
-			// else if ((str[i + 1] == 'i'))
-			// else if ((str[i + 1] == 'u'))
-			// else if ((str[i + 1] == 'x'))
-			// else if ((str[i + 1] == 'X'))
+				len = ft_printf_s(va_arg(args, char *), 1, len);
+			else if ((str[i + 1] == 'p'))
+				len = ft_printf_p(va_arg(args, long long int), 1, len);
+			else if ((str[i + 1] == 'd') || (str[i + 1] == 'i'))
+				len = ft_printf_d_i(va_arg(args, int), 1, len);
+			else if ((str[i + 1] == 'u'))\
+			 	len = ft_printf_u(va_arg(args,unsigned int), 1, len);
+			else if ((str[i + 1] == 'x'))
+				len = ft_printf_x(va_arg(args, long long int), 1, len);
+			else if ((str[i + 1] == 'X'))
+				len = ft_printf_X(va_arg(args, long long int), 1, len);
 			else
-				write(STDOUT_FILENO, "%", 1);
+			{
+				len = ft_putchar_fd('%', 1, len);
+				i--;
+			}
 			i += 2;
 		}
 		else
 		{
-			ft_putchar_fd(str[i], 1);
+			len = ft_putchar_fd(str[i], 1, len);
 			i++;
 		}
+		// printf("%d\n", len);
 	}
 	va_end (args);
-	return (0);
+	printf("final %i\n", len);
+	return (len);
 }
 
 int main(void)
 {
-	int n = 1;
-	ft_printf("%s a %d H c 1 %c**\n", "Tim", 33 , 'c');
-	printf("%s a %d H c 1 %c** %p\n", "Tim", 33 , 'c', &n);
+	int n = 1456543;
+	int size = 0;
+	
+	size = ft_printf("%s a %d H c 1 %c** %p %X %x %u\n", "Tim", 33, 'c', &n, n , n, n);
+	printf("siwe of print f = %d", size);
+	size = printf("%s a %d H c 1 %c** %p %X %x %u\n", "Tim", 33, 'c', &n, n , n, n);
+	printf("siwe of print f = %d", size);
 	return 0;
 }

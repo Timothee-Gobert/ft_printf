@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_printf.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tgobert <tgobert@student.42.fr>            +#+  +:+       +#+        */
+/*   By: inox <inox@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/10 07:34:22 by tgobert           #+#    #+#             */
-/*   Updated: 2025/11/10 08:02:03 by tgobert          ###   ########.fr       */
+/*   Updated: 2025/11/10 19:11:39 by inox             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,4 +20,7 @@
 # define HLF = "0123456789abcdef"
 # define HUF = "0123456789ABCDEF"
 # define DN = "0123456789"
+
+// void ft_putnbr_base_fd(int nbr, char *base, int fd);
+
 #endif

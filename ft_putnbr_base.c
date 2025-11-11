@@ -3,34 +3,34 @@
 /*                                                        :::      ::::::::   */
 /*   ft_putnbr_base.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tgobert <tgobert@student.42.fr>            +#+  +:+       +#+        */
+/*   By: inox <inox@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/10 12:35:42 by tgobert           #+#    #+#             */
-/*   Updated: 2025/11/10 12:55:15 by tgobert          ###   ########.fr       */
+/*   Updated: 2025/11/10 16:33:02 by inox             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "ft_printf.h"
+
 void	ft_putnbr_base_fd(int nbr, char *base, int fd)
 {
-	int	i;
-	int	length_base;
-
+	int i;
+	
 	i = 0;
 	while (base[i] != 0)
 		i++;
-	length_base = i;
 	if (nbr < 0)
 	{
 		write(1, "-", 1);
 		ft_putnbr_base_fd(-nbr, base, fd);
 	}
-	else if (nbr > length_base - 1)
+	else if (nbr > i - 1)
 	{
-		ft_putnbr_base_fd(nbr / length_base, base, fd);
-		ft_putnbr_base_fd(nbr % length_base, base, fd);
+		ft_putnbr_base_fd(nbr / i, base, fd);
+		ft_putnbr_base_fd(nbr % i, base, fd);
 	}
 	else
 	{
-		ft_putchar_fd(base[0 + nbr]);
+		ft_putchar_fd(base[0 + nbr], fd);
 	}
 }
